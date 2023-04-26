@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2017",                                 
+    "experimentalDecorators": true,                  
+    "emitDecoratorMetadata": true,                    
+    "module": "commonjs",                                
+    "baseUrl": "./",                                                     
+    "resolveJsonModule": true,                      
+    "outDir": "lib",                               
+    "esModuleInterop": true,                                                
+    "forceConsistentCasingInFileNames": true,           
+    /* Type Checking */
+    "strict": false,                                      
+    "skipLibCheck": true ,
+    "sourceMap": true,   
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,                            
+  },
+  "compileOnSave": true,
+  "include": [
+    "src"
+  ]
+}
+
+ 

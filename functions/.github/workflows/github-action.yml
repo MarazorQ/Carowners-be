@@ -1,0 +1,22 @@
+name: GitHub Actions for Vehicle app
+on: 
+  push: 
+    branches: [master, dev]
+  pull_request:
+    branches: [master, dev]
+jobs:
+  Start-project-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.14.0]
+    steps:
+     - uses: actions/checkout@v3
+     - name: Staring Node.js ${{ matrix.node-version }}
+       uses: actions/setup-node@v3
+       with:
+          node-version: ${{ matrix.node-version }}
+     - name: install modules
+       run: npm install
+     - name: build project
+       run: npm run build
