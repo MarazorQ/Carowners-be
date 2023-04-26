@@ -1,9 +1,7 @@
-import { Request } from 'express';
-
 import { CreateUserDto, UpdateUserDto, CheckUserPhoneDto } from '../dtos/user.dto';
 import Logger from '../core/logger/loger.service';
 import { HttpException } from '../core/errors/httpException.service';
-import { HttpStatus } from '../core/enums/httpStatus.enum';
+import { HttpStatus, ErrorMessages } from '../core/enums/httpStatus.enum';
 import { db, admin } from '../db/firebase';
 
 interface IUser {
@@ -14,10 +12,8 @@ interface IUser {
 }
 
 export class UserService {
-  async getOne(req: Request): Promise<IUser> {
+  async getOne(uid: string): Promise<IUser> {
     try {
-      const { uid } = req.user;
-
       const userRef = await db.collection('users').doc(uid).get();
 
       if (!userRef.exists) throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'User not found!' });
@@ -25,14 +21,17 @@ export class UserService {
 
       return userDataObj;
     } catch (error) {
-      console.error('[GET_ONE_USER_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[GET_ONE_USER_ERROR] ${error}`);
+
+      throw new HttpException({
+        httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
-  async create(payload: CreateUserDto, req: Request): Promise<IUser> {
+  async create(payload: CreateUserDto, uid: string): Promise<IUser> {
     try {
-      const { uid } = req.user;
       const { username, phoneNumber } = payload;
 
       const userQuerySnapshot = await db.collection('users').where('phoneNumber', '==', phoneNumber).get();
@@ -47,38 +46,34 @@ export class UserService {
 
       return newUser;
     } catch (error) {
-      console.error('[USER_CREATE_ERROR]', error.httpCode);
-      Logger.error(error);
+      Logger.error(`[USER_CREATE_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  async update(payload: UpdateUserDto, req: Request): Promise<IUser> {
+  async update(payload: UpdateUserDto, uid: string): Promise<IUser> {
     try {
-      const { uid } = req.user;
-
       const userRef = db.collection('users').doc(uid);
 
-      await userRef.update(JSON.parse(JSON.stringify(payload))); // update the user's data in the document
-
+      const a = await userRef.update({ ...payload }); // update the user's data in the document
+      console.log(a);
       const updatedUserData = (await userRef.get()).data() as IUser; // read the updated document and get the user data
       return updatedUserData;
     } catch (error) {
-      console.error('[USER_UPDATE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[USER_UPDATE_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  async checkUserPhone(payload: CheckUserPhoneDto) {
+  async checkUserPhone(payload: CheckUserPhoneDto): Promise<{ message: string }> {
     try {
       const { phoneNumber } = payload;
 
@@ -88,17 +83,14 @@ export class UserService {
         .where('phoneNumber', '==', phoneNumber)
         .get();
 
-      console.log('userQuerySnapshot', userQuerySnapshot);
-
       if (!userQuerySnapshot.empty) return { message: 'User exists' };
-      else throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'User not found!' });
+      else return { message: 'User not found!' };
     } catch (error) {
-      console.error('[USER_PHONE_CHECK_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[USER_PHONE_CHECK_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }

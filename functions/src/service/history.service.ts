@@ -1,5 +1,3 @@
-import { Request } from 'express';
-
 import { db } from '../db/firebase';
 import Logger from '../core/logger/loger.service';
 import { Timestamp } from 'firebase-admin/firestore';
@@ -36,15 +34,12 @@ export class HistoryService {
         }
       });
     } catch (error) {
-      console.error('[HISTORY_UPDATE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[HISTORY_UPDATE_ERROR] ${error}`);
     }
   }
 
-  async getAll(req: Request): Promise<{ history: IHistory[] }> {
+  async getAll(uid: string): Promise<{ history: IHistory[] }> {
     try {
-      const { uid } = req.user;
-
       const historyRef = db.collection('users').doc(uid).collection('history');
       const snapshot = await historyRef.get();
       const history: IHistory[] = [];
@@ -58,8 +53,7 @@ export class HistoryService {
 
       return { history };
     } catch (error) {
-      console.error('[GET_ALL_HISTORY_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[GET_ALL_HISTORY_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,

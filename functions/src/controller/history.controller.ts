@@ -7,15 +7,13 @@ import { HistoryService } from '../service/history.service';
 @Controller('/history')
 @UseAfter(loggingAfter)
 export class HistoryController {
-  private HistoryService: HistoryService;
-
-  constructor() {
-    this.HistoryService = new HistoryService();
-  }
+  constructor(private HistoryService: HistoryService) {}
 
   @UseBefore(authMiddleware)
   @Get('')
   getAll(@Req() req: Request) {
-    return this.HistoryService.getAll(req);
+    const { uid } = req.user;
+
+    return this.HistoryService.getAll(uid);
   }
 }

@@ -6,35 +6,36 @@ import { VehicleService } from '../service/vehicle.service';
 import { CreateVehicleDto } from '../dtos/vehicle.dto';
 
 @Controller('/vehicles')
+@UseBefore(authMiddleware)
 @UseAfter(loggingAfter)
 export class VehicleController {
-  private VehicleService: VehicleService;
+  constructor(private VehicleService: VehicleService) {}
 
-  constructor() {
-    this.VehicleService = new VehicleService();
-  }
-
-  @UseBefore(authMiddleware)
   @Get('')
   getAll(@Req() req: Request) {
-    return this.VehicleService.getAll(req);
+    const { uid } = req.user;
+
+    return this.VehicleService.getAll(uid);
   }
 
-  @UseBefore(authMiddleware)
   @Post('')
   create(@Body() payload: CreateVehicleDto, @Req() req: Request) {
-    return this.VehicleService.create(payload, req);
+    const { uid } = req.user;
+
+    return this.VehicleService.create(payload, uid);
   }
 
-  @UseBefore(authMiddleware)
   @Delete('/:id')
   delete(@Param('id') id: string, @Req() req: Request) {
-    return this.VehicleService.delete(id, req);
+    const { uid } = req.user;
+
+    return this.VehicleService.delete(id, uid);
   }
 
-  @UseBefore(authMiddleware)
   @Patch('/:id')
-  update(@Param('id') id: string, @Body() payload: any, @Req() req: Request) {
-    return this.VehicleService.update(id, payload, req);
+  update(@Param('id') id: string, @Body() payload: Partial<CreateVehicleDto>, @Req() req: Request) {
+    const { uid } = req.user;
+
+    return this.VehicleService.update(id, payload, uid);
   }
 }

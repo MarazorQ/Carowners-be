@@ -1,9 +1,7 @@
-import { Request } from 'express';
-
 import { CreateVehicleDto } from '../dtos/vehicle.dto';
 import Logger from '../core/logger/loger.service';
 import { HttpException } from '../core/errors/httpException.service';
-import { HttpStatus } from '../core/enums/httpStatus.enum';
+import { HttpStatus, ErrorMessages } from '../core/enums/httpStatus.enum';
 import { db } from '../db/firebase';
 import { HistoryService } from './history.service';
 
@@ -23,10 +21,8 @@ interface IVehicle {
 }
 
 export class VehicleService {
-  async getAll(req: Request): Promise<IVehicle[]> {
+  async getAll(uid: string): Promise<IVehicle[]> {
     try {
-      const { uid } = req.user;
-
       const snapshot = await db.collection('users').doc(uid).collection('vehicles').get();
 
       const vehicles = snapshot.docs.map((doc) => ({
@@ -36,20 +32,17 @@ export class VehicleService {
 
       return vehicles;
     } catch (error) {
-      console.error('[GET_ALL_VEHICLE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[GET_ALL_VEHICLE_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  async delete(vehicleId: string, req: Request): Promise<any> {
+  async delete(vehicleId: string, uid: string): Promise<{ message: string }> {
     try {
-      const { uid } = req.user;
-
       await db.collection('users').doc(uid).collection('vehicles').doc(vehicleId).delete();
 
       // Update the history collection
@@ -57,20 +50,17 @@ export class VehicleService {
 
       return { message: 'Success' };
     } catch (error) {
-      console.error('[DELETE_VEHICLE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[DELETE_VEHICLE_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  async create(payload: CreateVehicleDto, req: Request): Promise<IVehicle> {
+  async create(payload: CreateVehicleDto, uid: string): Promise<IVehicle> {
     try {
-      const { uid } = req.user;
-
       const ref = await db
         .collection('users')
         .doc(uid)
@@ -87,23 +77,20 @@ export class VehicleService {
 
       return vehicle;
     } catch (error) {
-      console.error('[VEHICLE_CREATE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[VEHICLE_CREATE_ERROR] ${error}`);
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
 
-  async update(vehicleId: string, payload: CreateVehicleDto, req: Request): Promise<IVehicle> {
+  async update(vehicleId: string, payload: Partial<CreateVehicleDto>, uid: string): Promise<IVehicle> {
     try {
-      const { uid } = req.user;
-
       const vehicleRef = db.collection('users').doc(uid).collection('vehicles').doc(vehicleId);
 
-      await vehicleRef.update(JSON.parse(JSON.stringify(payload)));
+      await vehicleRef.update({ ...payload });
 
       const vehicleDoc = await vehicleRef.get();
       const updatedVehicle = { id: vehicleDoc.id, ...vehicleDoc.data() } as IVehicle;
@@ -113,8 +100,12 @@ export class VehicleService {
 
       return updatedVehicle;
     } catch (error) {
-      console.error('[VEHICLE_UPDATE_ERROR]', error);
-      Logger.error(error);
+      Logger.error(`[VEHICLE_UPDATE_ERROR] ${error}`);
+
+      throw new HttpException({
+        httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }

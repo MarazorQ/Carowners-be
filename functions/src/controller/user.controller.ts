@@ -8,28 +8,30 @@ import { CreateUserDto, UpdateUserDto, CheckUserPhoneDto } from '../dtos/user.dt
 @Controller('/users')
 @UseAfter(loggingAfter)
 export class UserController {
-  private UserService: UserService;
-
-  constructor() {
-    this.UserService = new UserService();
-  }
+  constructor(private UserService: UserService) {}
 
   @UseBefore(authMiddleware)
   @Get('/getInfo')
   getOne(@Req() req: Request) {
-    return this.UserService.getOne(req);
+    const { uid } = req.user;
+
+    return this.UserService.getOne(uid);
   }
 
   @UseBefore(authMiddleware)
   @Post('/registration')
   create(@Body() payload: CreateUserDto, @Req() req: Request) {
-    return this.UserService.create(payload, req);
+    const { uid } = req.user;
+
+    return this.UserService.create(payload, uid);
   }
 
   @UseBefore(authMiddleware)
   @Patch('')
   update(@Body() payload: UpdateUserDto, @Req() req: Request) {
-    return this.UserService.update(payload, req);
+    const { uid } = req.user;
+
+    return this.UserService.update(payload, uid);
   }
 
   @Post('/checkPhone')
