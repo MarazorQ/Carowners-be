@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 import { loggingAfter, authMiddleware } from '../middleware/middleware';
 import { UserService } from '../service/user.service';
-import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
+import { CreateUserDto, UpdateUserDto, CheckUserPhoneDto } from '../dtos/user.dto';
 
 @Controller('/users')
 @UseAfter(loggingAfter)
@@ -30,5 +30,10 @@ export class UserController {
   @Patch('')
   update(@Body() payload: UpdateUserDto, @Req() req: Request) {
     return this.UserService.update(payload, req);
+  }
+
+  @Post('/checkPhone')
+  checkUserPhone(@Body() payload: CheckUserPhoneDto) {
+    return this.UserService.checkUserPhone(payload);
   }
 }

@@ -6,6 +6,7 @@ export class CreateUserDto {
   username: string;
 
   @IsNotEmpty()
+  @MaxLength(20)
   phoneNumber: string;
 }
 
@@ -17,4 +18,10 @@ export class UpdateUserDto {
   @IsOptional()
   @MaxLength(64)
   email: string;
+}
+
+export class CheckUserPhoneDto {
+  @IsNotEmpty()
+  @MaxLength(20)
+  phoneNumber: string;
 }

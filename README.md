@@ -1,7 +1,3 @@
-# CarOwners_backend
-Hi everyone!
-
-# Car Owners Test Task (backend) 📰🗞️
 
 ### Features
 
@@ -9,14 +5,9 @@ Hi everyone!
 - CRUD operations with user's vehicles
 - Get users's operations history
 
-### Clone
-
-`git clone https://github.com/GrinPavel/CarOwners_backend.git`
-
 ### ⚙️ Tools:
 
 - Express.js
-- Axios
 - TypeScript
 - Firebase admin
 - Firebase functions
