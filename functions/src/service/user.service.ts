@@ -10,6 +10,9 @@ interface IUser {
   username: string;
   email?: string;
 }
+export interface ICheckPhoneResponse {
+  message: string;
+}
 
 export class UserService {
   async getOne(uid: string): Promise<IUser> {
@@ -58,11 +61,13 @@ export class UserService {
   async update(payload: UpdateUserDto, uid: string): Promise<IUser> {
     try {
       const userRef = db.collection('users').doc(uid);
+      const isUserExist = (await userRef.get()).exists;
 
-      const a = await userRef.update({ ...payload }); // update the user's data in the document
-      console.log(a);
-      const updatedUserData = (await userRef.get()).data() as IUser; // read the updated document and get the user data
-      return updatedUserData;
+      if (!isUserExist) throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'User not found!' });
+
+      await userRef.update({ ...payload }); // update the user's data in the document
+
+      return (await userRef.get()).data() as IUser; // read the updated document and get the user data
     } catch (error) {
       Logger.error(`[USER_UPDATE_ERROR] ${error}`);
 
@@ -73,7 +78,7 @@ export class UserService {
     }
   }
 
-  async checkUserPhone(payload: CheckUserPhoneDto): Promise<{ message: string }> {
+  async checkUserPhone(payload: CheckUserPhoneDto): Promise<ICheckPhoneResponse> {
     try {
       const { phoneNumber } = payload;
 

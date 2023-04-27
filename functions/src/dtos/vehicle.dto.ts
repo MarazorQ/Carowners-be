@@ -1,4 +1,4 @@
-import { IsOptional, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateVehicleDto {
   @IsNotEmpty()

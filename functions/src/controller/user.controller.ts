@@ -8,7 +8,11 @@ import { CreateUserDto, UpdateUserDto, CheckUserPhoneDto } from '../dtos/user.dt
 @Controller('/users')
 @UseAfter(loggingAfter)
 export class UserController {
-  constructor(private UserService: UserService) {}
+  private UserService: UserService;
+
+  constructor() {
+    this.UserService = new UserService();
+  }
 
   @UseBefore(authMiddleware)
   @Get('/getInfo')

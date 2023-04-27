@@ -1,11 +1,13 @@
+import { FieldValue } from '@google-cloud/firestore';
+
 import { CreateVehicleDto } from '../dtos/vehicle.dto';
 import Logger from '../core/logger/loger.service';
 import { HttpException } from '../core/errors/httpException.service';
 import { HttpStatus, ErrorMessages } from '../core/enums/httpStatus.enum';
 import { db } from '../db/firebase';
-import { HistoryService } from './history.service';
+import { ICheckPhoneResponse } from './user.service';
 
-import { FieldValue } from '@google-cloud/firestore';
+import { HistoryService } from './history.service';
 
 interface IVehicle {
   id: string;
@@ -19,8 +21,13 @@ interface IVehicle {
     _nanoseconds: number;
   };
 }
+interface IDeleteResponse extends ICheckPhoneResponse {}
 
 export class VehicleService {
+  private async isVehicleExist(uid: string, vehicleId: string): Promise<boolean> {
+    return (await db.collection('users').doc(uid).collection('vehicles').doc(vehicleId).get()).exists;
+  }
+
   async getAll(uid: string): Promise<IVehicle[]> {
     try {
       const snapshot = await db.collection('users').doc(uid).collection('vehicles').get();
@@ -41,8 +48,12 @@ export class VehicleService {
     }
   }
 
-  async delete(vehicleId: string, uid: string): Promise<{ message: string }> {
+  async delete(vehicleId: string, uid: string): Promise<IDeleteResponse> {
     try {
+      const isVehicleExist = await this.isVehicleExist(uid, vehicleId);
+
+      if (!isVehicleExist) throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'Vehicle not found!' });
+
       await db.collection('users').doc(uid).collection('vehicles').doc(vehicleId).delete();
 
       // Update the history collection
@@ -61,13 +72,19 @@ export class VehicleService {
 
   async create(payload: CreateVehicleDto, uid: string): Promise<IVehicle> {
     try {
+      const { brand, mileage, model, price, year } = payload;
+
       const ref = await db
         .collection('users')
         .doc(uid)
         .collection('vehicles')
         .add({
           createdAt: FieldValue.serverTimestamp() || null,
-          ...payload,
+          brand,
+          mileage,
+          model,
+          price,
+          year,
         }); // Add the new vehicle document to the user's vehicles collection
 
       const snapshot = await ref.get(); // Query the new vehicle document
@@ -88,6 +105,10 @@ export class VehicleService {
 
   async update(vehicleId: string, payload: Partial<CreateVehicleDto>, uid: string): Promise<IVehicle> {
     try {
+      const isVehicleExist = await this.isVehicleExist(uid, vehicleId);
+
+      if (!isVehicleExist) throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'Vehicle not found!' });
+
       const vehicleRef = db.collection('users').doc(uid).collection('vehicles').doc(vehicleId);
 
       await vehicleRef.update({ ...payload });

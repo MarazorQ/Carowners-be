@@ -9,7 +9,11 @@ import { CreateVehicleDto } from '../dtos/vehicle.dto';
 @UseBefore(authMiddleware)
 @UseAfter(loggingAfter)
 export class VehicleController {
-  constructor(private VehicleService: VehicleService) {}
+  private VehicleService: VehicleService;
+
+  constructor() {
+    this.VehicleService = new VehicleService();
+  }
 
   @Get('')
   getAll(@Req() req: Request) {

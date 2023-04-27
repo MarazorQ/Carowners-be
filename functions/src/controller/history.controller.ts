@@ -7,7 +7,11 @@ import { HistoryService } from '../service/history.service';
 @Controller('/history')
 @UseAfter(loggingAfter)
 export class HistoryController {
-  constructor(private HistoryService: HistoryService) {}
+  private HistoryService: HistoryService;
+
+  constructor() {
+    this.HistoryService = new HistoryService();
+  }
 
   @UseBefore(authMiddleware)
   @Get('')

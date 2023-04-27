@@ -14,31 +14,35 @@ interface IHistory {
   data: IHistoryTimeFormat;
 }
 
+interface IAllHistoryResponse {
+  history: IHistory[];
+}
+
 export class HistoryService {
   // Helper function to update the history collection
   static async updateHistory(uid: string, vehicleId: string, action: string) {
     try {
       const historyRef = db.collection('users').doc(uid).collection('history').doc(vehicleId);
 
-      historyRef.get().then((doc: any) => {
-        if (doc.exists) {
-          const data = doc.data();
-          data[action] = new Date();
-          historyRef.set(data);
-        } else {
-          const data = {
-            create: new Date(),
-            [action]: new Date(),
-          };
-          historyRef.set(data);
-        }
-      });
+      const history = await historyRef.get();
+
+      if (history.exists) {
+        const data = history.data();
+        data[action] = new Date();
+        historyRef.set(data);
+      } else {
+        const data = {
+          create: new Date(),
+          [action]: new Date(),
+        };
+        historyRef.set(data);
+      }
     } catch (error) {
       Logger.error(`[HISTORY_UPDATE_ERROR] ${error}`);
     }
   }
 
-  async getAll(uid: string): Promise<{ history: IHistory[] }> {
+  async getAll(uid: string): Promise<IAllHistoryResponse> {
     try {
       const historyRef = db.collection('users').doc(uid).collection('history');
       const snapshot = await historyRef.get();
