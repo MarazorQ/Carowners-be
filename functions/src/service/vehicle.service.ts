@@ -111,7 +111,14 @@ export class VehicleService {
 
       const vehicleRef = db.collection('users').doc(uid).collection('vehicles').doc(vehicleId);
 
-      await vehicleRef.update({ ...payload });
+      const { brand, mileage, model, price, year } = payload;
+      const newVehicleData = { brand, mileage, model, price, year };
+
+      Object.keys(newVehicleData).map((key) => {
+        if (!newVehicleData[key]) delete newVehicleData[key];
+      });
+
+      await vehicleRef.update({ ...newVehicleData });
 
       const vehicleDoc = await vehicleRef.get();
       const updatedVehicle = { id: vehicleDoc.id, ...vehicleDoc.data() } as IVehicle;

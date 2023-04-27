@@ -65,7 +65,15 @@ export class UserService {
 
       if (!isUserExist) throw new HttpException({ httpCode: HttpStatus.BAD_REQUEST, name: 'User not found!' });
 
-      await userRef.update({ ...payload }); // update the user's data in the document
+      const { username, email } = payload;
+
+      const newUserData = { username, email };
+
+      Object.keys(newUserData).map((key) => {
+        if (!newUserData[key]) delete newUserData[key];
+      });
+
+      await userRef.update({ ...newUserData }); // update the user's data in the document
 
       return (await userRef.get()).data() as IUser; // read the updated document and get the user data
     } catch (error) {
