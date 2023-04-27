@@ -3,7 +3,7 @@ import Logger from '../core/logger/loger.service';
 import { Timestamp } from 'firebase-admin/firestore';
 
 import { HttpException } from '../core/errors/httpException.service';
-import { HttpStatus } from '../core/enums/httpStatus.enum';
+import { HttpStatus, ErrorMessages } from '../core/enums/httpStatus.enum';
 
 interface IHistoryTimeFormat {
   create: Timestamp;
@@ -61,7 +61,7 @@ export class HistoryService {
 
       throw new HttpException({
         httpCode: error?.httpCode || HttpStatus.INTERNAL_SERVER_ERROR,
-        name: error?.name || 'Internal server error',
+        name: error?.name || ErrorMessages.INTERNAL_SERVER_ERROR,
       });
     }
   }
