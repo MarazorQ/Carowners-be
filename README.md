@@ -16,5 +16,6 @@
 
 1. `Clone the repository and go to the root folder`
 2. `cd functions`
-3. `npm install`
-4. `npm serve // npm run deploy`
+3.  `create src/db/firebase-config.json and insert your firestore keys`
+4. `npm install`
+5. `npm serve // npm run deploy`

@@ -114,7 +114,7 @@ export class VehicleService {
       const { brand, mileage, model, price, year } = payload;
       const newVehicleData = { brand, mileage, model, price, year };
 
-      Object.keys(newVehicleData).map((key) => {
+      Object.keys(newVehicleData).forEach((key) => {
         if (!newVehicleData[key]) delete newVehicleData[key];
       });
 

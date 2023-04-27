@@ -69,7 +69,7 @@ export class UserService {
 
       const newUserData = { username, email };
 
-      Object.keys(newUserData).map((key) => {
+      Object.keys(newUserData).forEach((key) => {
         if (!newUserData[key]) delete newUserData[key];
       });
 
