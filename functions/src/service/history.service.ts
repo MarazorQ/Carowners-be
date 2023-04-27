@@ -29,13 +29,13 @@ export class HistoryService {
       if (history.exists) {
         const data = history.data();
         data[action] = new Date();
-        historyRef.set(data);
+        await historyRef.set(data);
       } else {
         const data = {
           create: new Date(),
           [action]: new Date(),
         };
-        historyRef.set(data);
+        await historyRef.set(data);
       }
     } catch (error) {
       Logger.error(`[HISTORY_UPDATE_ERROR] ${error}`);
